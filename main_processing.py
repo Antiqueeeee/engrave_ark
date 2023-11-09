@@ -124,6 +124,9 @@ print(f"已经找到符合标准的方案{len(results)}套。")
 
 
 # 方案数量虽然比较多，但是需要检索的首饰肯定有重叠，而且应该是大部分都是重叠
+#！！！！
+#  戒指耳环不应该分1，2喔
+#！！！
 jewelry_tobe_search = defaultdict(list)
 for res in _results:
     for med in res:
