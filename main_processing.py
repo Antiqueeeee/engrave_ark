@@ -5,8 +5,8 @@ import json
 
 target_engrave = {"盛放":15,"身披重甲":15,"妙手回春":15,"觉醒":15,"混元":3,"先发制人":3}
 # target_engrave = {"怨恨":15,"咒术人偶":15}
-engrave_books = {"盛放":12,"身披重甲":12}
-ability_stone = {"妙手回春":7,"觉醒":7}
+engrave_books = {"盛放":9,"身披重甲":9}
+ability_stone = {"妙手回春":6,"觉醒":6}
 
 # engraves_values = [(2,2),(3,2),(3,3),(3,4),(3,5),(4,3),(5,3)]
 engraves_values = [(3,3),(3,5),(5,3)]
@@ -15,10 +15,12 @@ engraves_values = [(3,3),(3,5),(5,3)]
 # 先检查点数够不够，点数不够中止，点数够继续运行
 max_point = max([sum(i) for i in engraves_values]) * 5 + sum([v for k,v in engrave_books.items()]) + sum([v for k,v in ability_stone.items()])
 target_value = sum([v for k,v in target_engrave.items()])
-print(f"期望刻印共需要点数:{target_value}点，但书石首饰只能提供{max_point}点，还差{target_value - max_point}点，请调整方案")
+print(f"期望刻印共需要点数:{target_value}点，书石首饰能提供{max_point}点",end="")
 if target_value > max_point:
-    print(f"期望刻印共需要点数:{target_value}点，但书石首饰只能提供{max_point}点，还差{abs(target_value - max_point)}点，请调整方案")
+    print(f"还差{abs(target_value - max_point)}点，请调整方案")
     raise
+else:
+    print("可以尝试。")
 
 for key,value in target_engrave.items():
     target_engrave[key] = target_engrave[key] - engrave_books.get(key,0)
@@ -27,6 +29,9 @@ for key,value in target_engrave.items():
 # 都有什么刻印
 engraves = list(target_engrave.keys())
 # 刻印两两搭配能有多少组合
+#！！！！！！
+#两个职业刻印不能在一起喔
+#！！！！
 combo_engraves = list()
 for i in range(len(engraves)):
     for j in range(i+1,len(engraves)):
@@ -55,7 +60,7 @@ for item in combo_jewelry:
     mapping_jewelry[item[0]].append(item)
 for k,v in mapping_jewelry.items():
     print(k,len(v))
-with open("mapping_jewelry.json","w",encoding="utf-8") as f:
+with open("temp/mapping_jewelry.json","w",encoding="utf-8") as f:
     json.dump(mapping_jewelry,f,ensure_ascii=False,indent=1)
 
 # 从项链开始一层一层向下穷举
@@ -113,7 +118,7 @@ for res in _results:
         _method.append(item)
     results.append(_method)
 
-with open(f"results.json","w",encoding="utf-8") as f:
+with open(f"temp/results.json","w",encoding="utf-8") as f:
     json.dump(results,f,ensure_ascii=False,indent=1)
 print(f"已经找到符合标准的方案{len(results)}套。")
 
