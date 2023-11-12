@@ -21,13 +21,17 @@ class method:
 target_engrave = {"盛放":15,"身披重甲":15,"妙手回春":15,"觉醒":15,"混元":3,"先发制人":3}
 target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"肾上腺素":10,"王后":5}
 target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"王后":5}
+target_engrave = {"巅峰":15,"奇袭大师":15,"咒术人偶":15,"怨恨":15,"肾上腺素":15}
 
 
 
 # target_engrave = {"怨恨":15,"咒术人偶":15}
 
 engrave_books = {"咒术人偶":12,"肾上腺素":12}
+engrave_books = {"咒术人偶":12,"巅峰":9}
+
 ability_stone = {"强力侧击":7,"怨恨":7}
+ability_stone = {"奇袭大师":6,"肾上腺素":9}
 
 # engraves_values = [(2,2),(3,2),(3,3),(3,4),(3,5),(4,3),(5,3)]
 engraves_values = [(3,3),(3,5),(5,3)]
@@ -159,8 +163,6 @@ result_frame = pd.DataFrame(columns=["位置","刻印1","能力值1","刻印2","
 for res in results:
     for method in res:
         for k,v in method.items():
-            print(type(k),k)
-            print(type(v),v)
             result_frame.loc[result_frame.shape[0]] = [k] + list(v)
     result_frame.loc[result_frame.shape[0]] = ["","","","",""]
 result_frame.to_csv("temp/results.csv",encoding="utf_8_sig",index=None)
