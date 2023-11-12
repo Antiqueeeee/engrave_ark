@@ -2,25 +2,57 @@ from copy import deepcopy
 from collections import defaultdict
 from tqdm import tqdm
 import json
+import os
+
+
+
+class method:
+    def __init__(self) -> None:
+        self.necklace = ""
+        self.earring1 = ""
+        self.earring2 = ""
+        self.ring1 = ""
+        self.ring2 = ""
+        self.ability_stone = dict()
+        self.engrave_books = dict()
+
+# personal settings
 
 target_engrave = {"盛放":15,"身披重甲":15,"妙手回春":15,"觉醒":15,"混元":3,"先发制人":3}
+target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"肾上腺素":10,"王后":5}
+target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"王后":5}
+
+
+
 # target_engrave = {"怨恨":15,"咒术人偶":15}
-engrave_books = {"盛放":9,"身披重甲":9}
-ability_stone = {"妙手回春":6,"觉醒":6}
+
+engrave_books = {"咒术人偶":12,"肾上腺素":12}
+ability_stone = {"强力侧击":7,"怨恨":7}
 
 # engraves_values = [(2,2),(3,2),(3,3),(3,4),(3,5),(4,3),(5,3)]
 engraves_values = [(3,3),(3,5),(5,3)]
 
 
+# default settings
+
+# 职业刻印有哪些
+professional_engrave = [
+    "盛放","混元","节制","巅峰"
+]
+if not os.path.exists("temp"):
+    os.makedirs("temp")
+
+
+
 # 先检查点数够不够，点数不够中止，点数够继续运行
 max_point = max([sum(i) for i in engraves_values]) * 5 + sum([v for k,v in engrave_books.items()]) + sum([v for k,v in ability_stone.items()])
 target_value = sum([v for k,v in target_engrave.items()])
-print(f"期望刻印共需要点数:{target_value}点，书石首饰能提供{max_point}点",end="")
+print(f"期望刻印共需要点数:{target_value}点，书石首饰能提供{max_point}点，",end="")
 if target_value > max_point:
     print(f"还差{abs(target_value - max_point)}点，请调整方案")
     raise
 else:
-    print("可以尝试。")
+    print("可以尝试。")  # 如果书石的刻印跟目标无关呢？
 
 for key,value in target_engrave.items():
     target_engrave[key] = target_engrave[key] - engrave_books.get(key,0)
@@ -28,14 +60,13 @@ for key,value in target_engrave.items():
 
 # 都有什么刻印
 engraves = list(target_engrave.keys())
-# 刻印两两搭配能有多少组合
-#！！！！！！
-#两个职业刻印不能在一起喔
-#！！！！
+
 combo_engraves = list()
 for i in range(len(engraves)):
     for j in range(i+1,len(engraves)):
-        combo_engraves.append([engraves[i],engraves[j]])
+        # 不能有两个职业刻印同时出现在首饰中
+        if i not in professional_engrave and j not in professional_engrave:
+            combo_engraves.append([engraves[i],engraves[j]])
 
 
 
@@ -77,16 +108,6 @@ for necklace in tqdm(mapping_jewelry["项链"]):
                         _sum += sum([_value1,_value2])
                     if _sum >= sum(target_engrave.values()):
                         methods.append([necklace,earring1,earring2,ring1,ring2])
-        #                 print(f"当前necklace为：{necklace}")
-        #                 print(f"当前earring1为：{earring1}")
-        #                 print(f"当前earring2为：{earring2}")
-        #                 print(f"当前ring1为：{ring1}")
-        #                 print(f"当前ring2为：{ring2}")
-                    
-        #             break
-        #         break
-        #     break
-        # break
 
 
 print(f"穷举所有可能，找到符合target_engrave的方案")
@@ -124,16 +145,29 @@ print(f"已经找到符合标准的方案{len(results)}套。")
 
 
 # 方案数量虽然比较多，但是需要检索的首饰肯定有重叠，而且应该是大部分都是重叠
-#！！！！
-#  戒指耳环不应该分1，2喔
-#！！！
 jewelry_tobe_search = defaultdict(list)
 for res in _results:
     for med in res:
         _part,_engrave1,_engrave2,(_value1,_value2) = med
         _values = (_engrave1,_engrave2,_value1,_value2)
-        if _values not in jewelry_tobe_search[_part]:
-            jewelry_tobe_search[_part].append(_values)
+        # 查询首饰的时候  耳环戒指不应该分1，2，方案都是一样的
+        if _values not in jewelry_tobe_search[_part[:2]]:
+            jewelry_tobe_search[_part[:2]].append(_values)
+
+import pandas as pd
+result_frame = pd.DataFrame(columns=["位置","刻印1","能力值1","刻印2","能力值2"],index=None)
+for res in results:
+    for method in res:
+        for k,v in method.items():
+            print(type(k),k)
+            print(type(v),v)
+            result_frame.loc[result_frame.shape[0]] = [k] + list(v)
+    result_frame.loc[result_frame.shape[0]] = ["","","","",""]
+result_frame.to_csv("temp/results.csv",encoding="utf_8_sig",index=None)
+
+
+
+# 计算需要检索的首饰个数
 _sum = 0
 for k,v in jewelry_tobe_search.items():
     _sum += len(v)
