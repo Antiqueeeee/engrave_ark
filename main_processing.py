@@ -4,8 +4,6 @@ from tqdm import tqdm
 import json
 import os
 
-
-
 class method:
     def __init__(self) -> None:
         self.necklace = ""
@@ -17,14 +15,10 @@ class method:
         self.engrave_books = dict()
 
 # personal settings
-
 target_engrave = {"盛放":15,"身披重甲":15,"妙手回春":15,"觉醒":15,"混元":3,"先发制人":3}
 target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"肾上腺素":10,"王后":5}
 target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"王后":5}
 target_engrave = {"巅峰":15,"奇袭大师":15,"咒术人偶":15,"怨恨":15,"肾上腺素":15}
-
-
-
 # target_engrave = {"怨恨":15,"咒术人偶":15}
 
 engrave_books = {"咒术人偶":12,"肾上腺素":12}
@@ -36,17 +30,13 @@ ability_stone = {"奇袭大师":6,"肾上腺素":9}
 # engraves_values = [(2,2),(3,2),(3,3),(3,4),(3,5),(4,3),(5,3)]
 engraves_values = [(3,3),(3,5),(5,3)]
 
-
 # default settings
-
 # 职业刻印有哪些
 professional_engrave = [
     "盛放","混元","节制","巅峰"
 ]
 if not os.path.exists("temp"):
     os.makedirs("temp")
-
-
 
 # 先检查点数够不够，点数不够中止，点数够继续运行
 max_point = max([sum(i) for i in engraves_values]) * 5 + sum([v for k,v in engrave_books.items()]) + sum([v for k,v in ability_stone.items()])
@@ -71,8 +61,6 @@ for i in range(len(engraves)):
         # 不能有两个职业刻印同时出现在首饰中
         if i not in professional_engrave and j not in professional_engrave:
             combo_engraves.append([engraves[i],engraves[j]])
-
-
 
 # 刻印两两搭配算上数值
 combo_engrave_values = list()
@@ -113,7 +101,6 @@ for necklace in tqdm(mapping_jewelry["项链"]):
                     if _sum >= sum(target_engrave.values()):
                         methods.append([necklace,earring1,earring2,ring1,ring2])
 
-
 print(f"穷举所有可能，找到符合target_engrave的方案")
 _results = list()
 for method in tqdm(methods) :
@@ -147,7 +134,6 @@ with open(f"temp/results.json","w",encoding="utf-8") as f:
     json.dump(results,f,ensure_ascii=False,indent=1)
 print(f"已经找到符合标准的方案{len(results)}套。")
 
-
 # 方案数量虽然比较多，但是需要检索的首饰肯定有重叠，而且应该是大部分都是重叠
 jewelry_tobe_search = defaultdict(list)
 for res in _results:
@@ -167,8 +153,6 @@ for res in results:
     result_frame.loc[result_frame.shape[0]] = ["","","","",""]
 result_frame.to_csv("temp/results.csv",encoding="utf_8_sig",index=None)
 
-
-
 # 计算需要检索的首饰个数
 _sum = 0
 for k,v in jewelry_tobe_search.items():
@@ -177,4 +161,3 @@ print(f"所有方案中，共需要检索首饰{_sum}件")
 
 # 需要检索的就是最开始组合出来的首饰数量，
 # 所以还是要从最开始搭配出来的首饰那里开始筛选
-
