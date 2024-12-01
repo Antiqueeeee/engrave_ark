@@ -16,19 +16,24 @@ class method:
 
 # personal settings
 target_engrave = {"盛放":15,"身披重甲":15,"妙手回春":15,"觉醒":15,"混元":3,"先发制人":3}
-target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"肾上腺素":10,"王后":5}
+
 target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"护盾猛攻":15,"王后":5}
-target_engrave = {"巅峰":15,"奇袭大师":15,"咒术人偶":15,"怨恨":15,"肾上腺素":15}
+
+target_engrave = {"强力侧击":15,"咒术人偶":15,"怨恨":15,"迅捷利刃":15,"肾上腺素":10,"王后":5}
+target_engrave = {"尖刺重锤":15,"咒术人偶":15,"怨恨":15,"和平之光":15}
+main_prop,sub_prop = "会心","专长"
+
+limit = [
+    {"怨恨","巅峰"},{"巅峰","奇袭大师"}
+]
 # target_engrave = {"怨恨":15,"咒术人偶":15}
 
-engrave_books = {"咒术人偶":12,"肾上腺素":12}
-engrave_books = {"咒术人偶":12,"巅峰":9}
+engrave_books = {"咒术人偶":12,"和平之光":9}
 
-ability_stone = {"强力侧击":7,"怨恨":7}
-ability_stone = {"奇袭大师":6,"肾上腺素":9}
+ability_stone = {"尖刺重锤":3,"怨恨":8}
 
 # engraves_values = [(2,2),(3,2),(3,3),(3,4),(3,5),(4,3),(5,3)]
-engraves_values = [(3,3),(3,5),(5,3)]
+engraves_values = [(3,3)]
 
 # default settings
 # 职业刻印有哪些
@@ -54,13 +59,16 @@ for key,value in target_engrave.items():
 
 # 都有什么刻印
 engraves = list(target_engrave.keys())
-
 combo_engraves = list()
 for i in range(len(engraves)):
     for j in range(i+1,len(engraves)):
         # 不能有两个职业刻印同时出现在首饰中
         if i not in professional_engrave and j not in professional_engrave:
-            combo_engraves.append([engraves[i],engraves[j]])
+            if len(limit):
+                if {engraves[i],engraves[j]} not in limit:
+                    combo_engraves.append([engraves[i],engraves[j]])
+            else:
+                combo_engraves.append([engraves[i],engraves[j]])
 
 # 刻印两两搭配算上数值
 combo_engrave_values = list()
@@ -134,15 +142,22 @@ with open(f"temp/results.json","w",encoding="utf-8") as f:
     json.dump(results,f,ensure_ascii=False,indent=1)
 print(f"已经找到符合标准的方案{len(results)}套。")
 
-# 方案数量虽然比较多，但是需要检索的首饰肯定有重叠，而且应该是大部分都是重叠
-jewelry_tobe_search = defaultdict(list)
+# 方案数量虽然比较多，但是需要检索的首饰大部分都是重叠
+jewelry_tobe_search = list()
 for res in _results:
     for med in res:
         _part,_engrave1,_engrave2,(_value1,_value2) = med
-        _values = (_engrave1,_engrave2,_value1,_value2)
+        if _part[:2] == "项链":
+            _values = [_part[:2],[["刻印效果",_engrave1,_value1],["刻印效果",_engrave2,_value2]],[["战斗特性",main_prop,""],["战斗特性",sub_prop,""]]]
+        else:
+            _values = [_part[:2],[["刻印效果",_engrave1,_value1],["刻印效果",_engrave2,_value2]],[["战斗特性",main_prop,""]]]
+            
         # 查询首饰的时候  耳环戒指不应该分1，2，方案都是一样的
-        if _values not in jewelry_tobe_search[_part[:2]]:
-            jewelry_tobe_search[_part[:2]].append(_values)
+        if _values not in jewelry_tobe_search:
+            jewelry_tobe_search.append(_values)
+print(f"jewelry_tobe_search:\n{jewelry_tobe_search[0]}\n\n")
+
+
 
 import pandas as pd
 result_frame = pd.DataFrame(columns=["位置","刻印1","能力值1","刻印2","能力值2"],index=None)
@@ -153,11 +168,11 @@ for res in results:
     result_frame.loc[result_frame.shape[0]] = ["","","","",""]
 result_frame.to_csv("temp/results.csv",encoding="utf_8_sig",index=None)
 
+with open("temp/jewelry_tobe_search.json","w",encoding="utf-8") as f:
+    json.dump(jewelry_tobe_search,f,ensure_ascii=False,indent=2)
+
 # 计算需要检索的首饰个数
-_sum = 0
-for k,v in jewelry_tobe_search.items():
-    _sum += len(v)
-print(f"所有方案中，共需要检索首饰{_sum}件")
+print(f"所有方案中，共需要检索首饰{len(jewelry_tobe_search)}件")
 
 # 需要检索的就是最开始组合出来的首饰数量，
 # 所以还是要从最开始搭配出来的首饰那里开始筛选
